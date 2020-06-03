@@ -118,6 +118,13 @@ def test_baker_hubbard_3(get_fn):
     eq(np.array([[0, 1, 3]]), md.baker_hubbard(t, exclude_water=False))
 
 
+def test_baker_hubbard_4(get_fn):
+    #considering heavy_atom_distance rather than D-H...A distance
+    t = md.load(get_fn('2waters_baker_hubbard.pdb'))
+    eq(np.zeros((0,3), dtype=int), md.baker_hubbard(t, exclude_water=False, distance_cutoff=0.27, heavy_atom_distance=True))
+    eq(np.array([[0, 1, 3]]), md.baker_hubbard(t, exclude_water=False, distance_cutoff=0.28, heavy_atom_distance=True))
+
+
 def test_wernet_nilsson_0(get_fn):
     # no hydrogens in this file -> no hydrogen bonds
     t0 = md.load(get_fn('1bpi.pdb'))

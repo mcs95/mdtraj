@@ -144,7 +144,7 @@ def wernet_nilsson(traj, exclude_water=True, periodic=True, sidechain_only=False
 
 
 def baker_hubbard(traj, freq=0.1, exclude_water=True, periodic=True, sidechain_only=False,
-                  distance_cutoff=0.25, angle_cutoff=120):
+                  distance_cutoff=0.25, angle_cutoff=120, heavy_atom_distance=False):
     """Identify hydrogen bonds based on cutoffs for the Donor-H...Acceptor
     distance and angle.
 
@@ -176,6 +176,9 @@ def baker_hubbard(traj, freq=0.1, exclude_water=True, periodic=True, sidechain_o
         Angle cutoff of the angle theta in degrees. 
         The criterion employed is any contact with an angle theta greater than the
         angle_cutoff is accepted.
+    heavy_atom_distance : bool, default=False
+        When True the distance cutoff considers heavy atom distances rather than
+        D-H...A distances.
 
     Returns
     -------
@@ -232,13 +235,18 @@ def baker_hubbard(traj, freq=0.1, exclude_water=True, periodic=True, sidechain_o
     if traj.topology is None:
         raise ValueError('baker_hubbard requires that traj contain topology '
                          'information')
-
+    
+    if heavy_atom_distance == True:
+        distance_index_array = [0, 2]
+    else:
+        distance_index_array = [1, 2]
+    
     # Get the possible donor-hydrogen...acceptor triplets
     bond_triplets = _get_bond_triplets(traj.topology,
         exclude_water=exclude_water, sidechain_only=sidechain_only)
 
     mask, distances, angles = _compute_bounded_geometry(traj, bond_triplets,
-        distance_cutoff, [1, 2], [0, 1, 2], freq=freq, periodic=periodic)
+        distance_cutoff, distance_index_array, [0, 1, 2], freq=freq, periodic=periodic)
 
     # Find triplets that meet the criteria
     presence = np.logical_and(distances < distance_cutoff, angles > angle_cutoff)
